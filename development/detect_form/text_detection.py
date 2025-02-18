@@ -21,6 +21,5 @@ class TextDetection:
         print(result)
 
 
-tmp = TextDetection().detect_text(Utils().preprocess_image('./image/Medium/2.png'))
+tmp = TextDetection().detect_text(Utils().preprocess_image('./image/Medium/1.png'))
 
-# tmp = TextDetection().keras_ocr('./image/Quality/1.png')

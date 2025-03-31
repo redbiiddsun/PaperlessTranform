@@ -5,3 +5,20 @@ services:
      - "8000:80"
     volumes:
      - .:/app
+
+  database:
+    container_name: paperlesstranform_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: dbadmin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: paperlesstranform-service
+    ports:
+      - "5432:5432"
+    volumes:
+     - postgres_data:/var/lib/postgresql/data
+
+
+volumes:
+  postgres_data:

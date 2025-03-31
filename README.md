@@ -7,7 +7,6 @@ This REST API serves a PaperlessTranform and Machine Learning Development
 Ensure you have the following installed:
 
 - [Python 3.6+](https://www.python.org/downloads/)
-- [Virtual Environments with Python 3.6+](https://docs.python.org/3/tutorial/venv.html)
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
@@ -17,7 +16,9 @@ ___
 
 1. **Create a virtual environment:**
     ```bash
-    python3 -m venv env
+    python3 -m venv env 
+    or 
+    python -m venv env
     ```
 
 2. **Activate the virtual environment:**
@@ -41,7 +42,7 @@ ___
 
 2. **Start the application:**
     ```bash
-    fastapi dev main.py 
+    uvicorn app.main:app --reload
     ```
 
 ### Note:

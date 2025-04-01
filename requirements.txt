@@ -18,6 +18,7 @@ jsonschema-specifications==2024.10.1
 numpy==2.2.4
 ollama==0.4.7
 packaging==24.2
+psycopg2-binary==2.9.10
 pydantic==2.11.1
 pydantic-settings==2.8.1
 pydantic_core==2.33.0

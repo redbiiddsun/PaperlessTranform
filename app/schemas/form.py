@@ -12,11 +12,11 @@ class Form(SQLModel, table=True):
 
     schema: dict = Field(sa_column=Column(JSON), default={})
 
-    user_id: uuid.UUID = Field(default=None, foreign_key="user.id")
+    userId: uuid.UUID = Field(default=None, foreign_key="user.id")
 
     requiedLogin: bool = Field(default=False)
 
-    created_at: datetime = Field(default_factory=datetime.now())
+    createdAt: datetime = Field(default_factory=datetime.now())
 
-    updated_at: datetime = Field(default_factory=datetime.now())
+    updatedAt: datetime = Field(default_factory=datetime.now())
     

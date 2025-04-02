@@ -13,13 +13,13 @@ class User(SQLModel, table=True):
 
     password: str
 
-    first_name: str
+    firstname: str
 
-    last_name: str
+    lastname: str
 
-    is_active: bool = Field(default=True)
+    isActive: bool = Field(default=True)
 
-    created_at: datetime = Field(default_factory=datetime.now)
+    createdAt: datetime = Field(default_factory=datetime.now)
 
-    updated_at: datetime = Field(default_factory=datetime.now)
+    updatedAt: datetime = Field(default_factory=datetime.now)
     

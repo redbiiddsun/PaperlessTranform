@@ -2,7 +2,6 @@ from typing import Annotated
 from fastapi import Depends
 from sqlmodel import create_engine, Session, SQLModel
 from app.config import settings
-import app.schemas.user
 
 postgres_url = f"postgresql://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
 

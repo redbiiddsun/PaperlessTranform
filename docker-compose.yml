@@ -5,6 +5,8 @@ services:
      - "8000:80"
     volumes:
      - .:/app
+    env_file:
+      - .env
 
   database:
     container_name: paperlesstranform_db

@@ -95,10 +95,10 @@ class AuthService:
         session.refresh(new_otp)
 
         # Send OTP to the user's email
-        email_sender.send_email('sunphanasorn@gmail.com', 
-                                'Paperlesstranform - OTP to Reset Your Password', 
-                                'Your OTP is: {} with ref code: {}'.format(new_otp.otp, new_otp.referenceCode), 
-                                from_email='noreply@paperlesstranform.com')
+        email_sender.send_email(to_email = requestOtpModel.email, 
+                                subject = 'Paperlesstranform - OTP to Reset Your Password', 
+                                body = 'Your OTP is: {} with ref code: {}'.format(new_otp.otp, new_otp.referenceCode), 
+                                from_email = 'noreply@paperlesstranform.com')
 
         return {
             "status": "success",

@@ -14,8 +14,7 @@ class Form(SQLModel, table=True):
 
     userId: uuid.UUID = Field(default=None, foreign_key="user.id")
 
-    requiedLogin: bool = Field(default=False)
-
+    requiredLogin: bool = Field(default=False)
     createdAt: datetime = Field(default_factory=datetime.now())
 
     updatedAt: datetime = Field(default_factory=datetime.now())

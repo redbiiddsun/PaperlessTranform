@@ -1,12 +1,15 @@
 services:
   web:
+    container_name: paperlesstranform_web
     build: .
     ports:
-     - "8000:80"
+      - "8000:8000"
     volumes:
-     - .:/app
+      - .:/app
     env_file:
       - .env
+    depends_on:
+      - database
 
   database:
     container_name: paperlesstranform_db

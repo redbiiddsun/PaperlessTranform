@@ -3,6 +3,7 @@ from sqlmodel import Session
 
 from app.auth.models.otp_user_model import RequestOtpModel
 from app.auth.models.register_user_model import RegisterUserModel
+from app.auth.models.reset_password_model import ResetPasswordModel
 from app.auth.models.signin_model import SignInModel
 from app.auth.models.verify_otp_model import VerifyOtpModel
 from app.auth.service import AuthService
@@ -21,6 +22,8 @@ class AuthRouter:
         self.router.add_api_route("/signin", self.signin, methods=["POST"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("/request-reset", self.requestOtp, methods=["POST"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("/verify-otp", self.verifyOtp, methods=["POST"], status_code=status.HTTP_200_OK)
+        self.router.add_api_route("/reset-password", self.resetPassword, methods=["POST"], status_code=status.HTTP_200_OK)
+
 
 
 
@@ -36,5 +39,7 @@ class AuthRouter:
     async def verifyOtp(self, response: Response, verifyOtpModel: VerifyOtpModel, session: Session = Depends(get_session)):
         return await AuthService.verifyOtp(response, verifyOtpModel, session)
 
+    async def resetPassword(self, response: Response, resetPasswordModel: ResetPasswordModel, session: Session = Depends(get_session)):
+        return await AuthService.resetPassword(response, resetPasswordModel, session)
 
 auth_router = AuthRouter().router

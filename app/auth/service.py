@@ -4,6 +4,7 @@ import bcrypt
 from fastapi import HTTPException, Response, status
 from sqlmodel import Session, select
 from app.auth.models.otp_user_model import RequestOtpModel
+from app.auth.models.reset_password_model import ResetPasswordModel
 from app.auth.models.signin_model import SignInModel
 from app.auth.models.register_user_model import RegisterUserModel
 from app.auth.models.verify_otp_model import VerifyOtpModel
@@ -17,16 +18,18 @@ from app.schemas.otp import Otp
 from app.schemas.reset_password_session import ResetPasswordSession
 
 class AuthService:
+
+    HASH_SALT = bcrypt.gensalt(10)
+
+
     def __init__(self):
         pass
 
     async def register_user(self, registerUserModel: RegisterUserModel, session: Session):
 
-        HASH_SALT = bcrypt.gensalt(10)
-
         new_user = User(
             email= registerUserModel.email,
-            password= bcrypt.hashpw(registerUserModel.password.encode("utf-8"), HASH_SALT).decode("utf-8"),
+            password= bcrypt.hashpw(registerUserModel.password.encode("utf-8"), self.HASH_SALT).decode("utf-8"),
             firstname= registerUserModel.firstname,
             lastname= registerUserModel.lastname,
         )
@@ -161,6 +164,43 @@ class AuthService:
             "status": "success",
             "message": "OTP verified successfully",
             "token": new_reset_password_session.token,
+        }
+    
+
+    async def resetPassword(self, response: Response, resetPasswordModel: ResetPasswordModel, session: Session):
+
+        current_session = session.exec(
+            select(ResetPasswordSession).where(ResetPasswordSession.token == resetPasswordModel.token)
+        ).first()
+
+        current_session_user = session.exec(
+            select(User).where(User.id == current_session.userId)
+        ).first()
+
+        if(current_session is None):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid token")
+        
+        if(current_session.isReset):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Token already used")
+        
+        if utc_now() > current_session.expireAt.replace(tzinfo=timezone.utc):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Token expired")
+        
+        #Update the ResetPassword status to Used
+        current_session.isReset =True
+        session.add(current_session)
+        session.commit()
+        session.refresh(current_session)
+
+        # Update the user's password
+        current_session_user.password = bcrypt.hashpw(resetPasswordModel.password.encode("utf-8"), self.HASH_SALT).decode("utf-8")
+        session.add(current_session)
+        session.commit()
+        session.refresh(current_session)
+
+        return {
+            "status": "success",
+            "message": "Password reset successfully",
         }
     
 

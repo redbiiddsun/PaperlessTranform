@@ -1,8 +1,10 @@
 import uuid
 
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import JSON, Column, Field, SQLModel
+
+from app.common.time import utc_now
 
 class FormResult(SQLModel, table=True):
 
@@ -14,5 +16,5 @@ class FormResult(SQLModel, table=True):
 
     result: dict = Field(sa_column=Column(JSON), default={})
 
-    createdAt: datetime = Field(default_factory=datetime.now())
+    createdAt: datetime = Field(default_factory=utc_now)
     

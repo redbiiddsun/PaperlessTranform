@@ -4,6 +4,8 @@ from typing import Optional
 from datetime import datetime
 from sqlmodel import Field, SQLModel
 
+from app.common.time import utc_now
+
 class User(SQLModel, table=True):
     __tablename__ = "user"
 
@@ -19,7 +21,7 @@ class User(SQLModel, table=True):
 
     isActive: bool = Field(default=True)
 
-    createdAt: datetime = Field(default_factory=datetime.now)
+    createdAt: datetime = Field(default_factory=utc_now)
 
-    updatedAt: datetime = Field(default_factory=datetime.now)
+    updatedAt: datetime = Field(default_factory=utc_now)
     

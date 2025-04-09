@@ -1,16 +1,20 @@
+from datetime import datetime, timedelta, timezone
+import secrets
 import bcrypt
-from fastapi import Depends, HTTPException, Response, status
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from fastapi import HTTPException, Response, status
+from sqlmodel import Session, select
 from app.auth.models.otp_user_model import RequestOtpModel
 from app.auth.models.signin_model import SignInModel
 from app.auth.models.register_user_model import RegisterUserModel
+from app.auth.models.verify_otp_model import VerifyOtpModel
 from app.common.jwt import signJwt
 from app.common.regex import EMAIL_REGEX
+from app.common.time import utc_now
 from app.common.util import generate_otp, generate_otp_reference
 from app.common.email import email_sender
-from app.database import get_session
 from app.schemas import User
 from app.schemas.otp import Otp
+from app.schemas.reset_password_session import ResetPasswordSession
 
 class AuthService:
     def __init__(self):
@@ -106,6 +110,58 @@ class AuthService:
             "refCode": new_otp.referenceCode,
             "token": new_otp.id,
         }
+    
+    async def verifyOtp(self, response: Response, verifyOtpModel: VerifyOtpModel, session: Session):
 
+        current_otp = session.exec(
+            select(Otp).where(Otp.id == verifyOtpModel.token)
+        ).first()
+
+        if(current_otp is None):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid OTP")
+        
+        if(current_otp.isVerified):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP already verified")
+        
+        if utc_now() > current_otp.expireAt.replace(tzinfo=timezone.utc):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP expired")
+        
+        if(current_otp.attempted >= 3):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP exceeded maximum attempts")
+
+        if(current_otp.otp != verifyOtpModel.otp):
+            # Add a for the number of attempts
+            current_otp.attempted = current_otp.attempted +  1
+            session.add(current_otp)
+            session.commit()
+            session.refresh(current_otp)
+
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP incorrect")
+        
+
+        #Update the OTP status to Verified
+        current_otp.isVerified = True
+        session.add(current_otp)
+        session.commit()
+        session.refresh(current_otp)
+
+        # Create a new reset password session
+        new_reset_password_session = ResetPasswordSession(
+            userId = current_otp.userId,
+            token = secrets.token_hex(32),
+            isReset = False,
+        )
+
+        # create a new reset password session
+        session.add(new_reset_password_session)
+        session.commit()
+        session.refresh(new_reset_password_session)
+
+        return {
+            "status": "success",
+            "message": "OTP verified successfully",
+            "token": new_reset_password_session.token,
+        }
+    
 
 AuthService = AuthService()

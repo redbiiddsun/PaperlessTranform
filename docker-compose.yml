@@ -1,0 +1,33 @@
+services:
+  web:
+    container_name: paperlesstranform_web
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      DATABASE_HOST: database
+    depends_on:
+      - database
+
+  database:
+    container_name: paperlesstranform_db
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: dbadmin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: paperlesstranform-service
+      TZ: UTC
+      PGTZ: UTC 
+    ports:
+      - "5432:5432"
+    volumes:
+     - postgres_data:/var/lib/postgresql/data
+
+
+volumes:
+  postgres_data:

@@ -1,8 +1,20 @@
+import re
 import pymupdf
 
 class PDFExtractor:
     def __init__(self):
         pass
+
+    # This function is used to normalize specific dot characters in the text.
+    # It replaces the characters: . … · ․ with a standard dot '.'
+    # Becasue some PDF files may contain these characters instead of a standard dot.
+    # Such as
+    # … Unicode ellipsis
+    # · middle dot
+    # ․ one dot leader
+    # Rather than using the standard dot '.'
+    def replace_non_standard_dots(self, text):
+        return re.sub(r'[…·․]', '.', text)
 
     def extract_text(self, file_path: str) -> str:
         if not file_path:
@@ -15,6 +27,6 @@ class PDFExtractor:
 
                 text = page.get_text()
 
-                return text
+                return self.replace_non_standard_dots(text)
         except Exception as e:
             raise RuntimeError(f"Error extracting text: {e}")

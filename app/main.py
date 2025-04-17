@@ -7,9 +7,15 @@ from app.auth import auth_router
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
 
+origins = [
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "https://paperless-tranform-frontend.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

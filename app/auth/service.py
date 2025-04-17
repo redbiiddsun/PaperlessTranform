@@ -71,7 +71,14 @@ class AuthService:
         if not bcrypt.checkpw(loginModel.password.encode("utf-8"), current_user.password.encode("utf-8")):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid email or password")
         
-        response.set_cookie(key="session", value=signJwt(current_user.id))
+        response.set_cookie(key = "session", 
+                            value = signJwt(current_user.id), 
+                            path="/",
+                            max_age = 60 * 60 * 24,
+                            samesite="none",
+                            httponly=True,
+                            secure=True,
+                            )
 
         return {
             "status": "success",

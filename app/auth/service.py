@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import timezone
 import secrets
 import bcrypt
 from fastapi import HTTPException, Response, status
@@ -8,6 +8,7 @@ from app.auth.models.reset_password_model import ResetPasswordModel
 from app.auth.models.signin_model import SignInModel
 from app.auth.models.register_user_model import RegisterUserModel
 from app.auth.models.verify_otp_model import VerifyOtpModel
+from app.common.errors.user_error import ExistingEmail, ExpiredOTP, InvalidEmailFormat, InvalidEmailPassword, InvalidOTP, InvalidToken, MaximumAttempOTP, OTPAlreadyVerified, TokenExpired, UserNotFound
 from app.common.jwt import signJwt
 from app.common.regex import EMAIL_REGEX
 from app.common.time import utc_now
@@ -35,7 +36,7 @@ class AuthService:
         )
 
         if EMAIL_REGEX.match(registerUserModel.email) is None:
-            raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email format")
+            raise  InvalidEmailFormat()
 
         # Check if the email already exists
         existing_email = session.exec(
@@ -43,7 +44,7 @@ class AuthService:
         ).first()
 
         if existing_email:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+            raise ExistingEmail()
 
         session.add(new_user)
         session.commit()
@@ -58,7 +59,7 @@ class AuthService:
     async def signIn(self, response: Response, loginModel: SignInModel, session: Session):
 
         if EMAIL_REGEX.match(loginModel.email) is None:
-            raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email format")
+            raise InvalidEmailFormat()
         
         # Check if the email already exists
         current_user = session.exec(
@@ -66,12 +67,19 @@ class AuthService:
         ).first()
 
         if current_user is None:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid email or password")
+            raise InvalidEmailPassword()
         
         if not bcrypt.checkpw(loginModel.password.encode("utf-8"), current_user.password.encode("utf-8")):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid email or password")
+            raise InvalidEmailPassword()
         
-        response.set_cookie(key="session", value=signJwt(current_user.id))
+        response.set_cookie(key = "session", 
+                            value = signJwt(current_user.id), 
+                            path="/",
+                            max_age = 60 * 60 * 24,
+                            samesite="none",
+                            httponly=True,
+                            secure=True,
+                            )
 
         return {
             "status": "success",
@@ -80,7 +88,7 @@ class AuthService:
     
     async def requestOtp(self, response: Response, requestOtpModel: RequestOtpModel, session: Session):
         if EMAIL_REGEX.match(requestOtpModel.email) is None:
-            raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email format")
+            raise InvalidEmailFormat()
         
         # Check if the email already exists
         current_user = session.exec(
@@ -88,7 +96,7 @@ class AuthService:
         ).first()
 
         if current_user is None:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User not found")
+            raise UserNotFound()
         
         new_otp = Otp(
             email = requestOtpModel.email,
@@ -121,16 +129,16 @@ class AuthService:
         ).first()
 
         if(current_otp is None):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid OTP")
+            raise InvalidOTP()
         
         if(current_otp.isVerified):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP already verified")
+            raise OTPAlreadyVerified()
         
         if utc_now() > current_otp.expireAt.replace(tzinfo=timezone.utc):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP expired")
+            raise ExpiredOTP()
         
         if(current_otp.attempted >= 3):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP exceeded maximum attempts")
+            raise MaximumAttempOTP()
 
         if(current_otp.otp != verifyOtpModel.otp):
             # Add a for the number of attempts
@@ -139,7 +147,7 @@ class AuthService:
             session.commit()
             session.refresh(current_otp)
 
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="OTP incorrect")
+            raise InvalidOTP()
         
 
         #Update the OTP status to Verified
@@ -178,13 +186,13 @@ class AuthService:
         ).first()
 
         if(current_session is None):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid token")
+            raise InvalidToken()
         
         if(current_session.isReset):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Token already used")
+            raise InvalidToken()
         
         if utc_now() > current_session.expireAt.replace(tzinfo=timezone.utc):
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Token expired")
+            raise TokenExpired()
         
         #Update the ResetPassword status to Used
         current_session.isReset =True

@@ -1,15 +1,23 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.common.errors.base_http_exception import BaseHTTPException
 from app.database import create_db_and_tables
 from app.auth import auth_router
 
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
 
+origins = [
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "https://paperless-tranform-frontend.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,6 +28,22 @@ def on_startup():
     create_db_and_tables()
 
 app.include_router(auth_router)
+
+@app.exception_handler(BaseHTTPException)
+async def custom_exception_handler(request: Request, exc: BaseHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"status": exc.status, 
+                 "detail": exc.detail, 
+                 "error_code": exc.error_code},
+    )
+
+@app.exception_handler(500)
+async def internal_exception_handler(request: Request, exc: Exception):
+  return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                      content={"status": "error", 
+                                "detail": "Internal server error",
+                                "error_code": "ERR_INTERNAL_SERVER_ERROR"})
 
 @app.get("/")
 async def welcome():

@@ -73,5 +73,15 @@ class TestFormParse(unittest.TestCase):
 
         compare_dicts(test_suit["form_4"]["file_path"], extracted_text, excepted_text)
 
+    def test_form_5(self):
+        
+        pdf_reader = PDFExtractor().extract_text(test_suit["form_5"]["file_path"])
+
+        extracted_text = TextParse.extract_labels(pdf_reader)
+
+        excepted_text = test_suit["form_5"]["expected_labels"]
+
+        compare_dicts(test_suit["form_5"]["file_path"], extracted_text, excepted_text)
+
 if __name__ == '__main__':
    unittest.main()

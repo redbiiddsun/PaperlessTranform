@@ -76,9 +76,8 @@ class AuthService:
                             value = signJwt(current_user.id), 
                             path="/",
                             max_age = 60 * 60 * 24,
-                            samesite="none",
-                            httponly=True,
-                            secure=True,
+                            samesite="strict",
+                            secure=False,
                             )
 
         return {

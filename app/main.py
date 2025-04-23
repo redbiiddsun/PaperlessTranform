@@ -13,6 +13,7 @@ origins = [
     "http://localhost:5173",
     "https://localhost:5173",
     "https://paperless-tranform-frontend.vercel.app",
+    "https://www.paperlesstransform.online",
 ]
 
 app.add_middleware(

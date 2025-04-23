@@ -46,6 +46,11 @@ ___
     uvicorn app.main:app --reload
     ```
 
+3. **Run a unit test:**
+    ```bash
+    python -m unittest development.tests.test_for
+    ```
+
 ### Note:
 
 You can configure the database using an environment variable:

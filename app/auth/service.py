@@ -73,11 +73,11 @@ class AuthService:
             raise InvalidEmailPassword()
         
         response.set_cookie(key = "session", 
-                            value = signJwt(current_user.id), 
+                            value = signJwt(current_user.id),
+                            domain=".paperlesstransform.online", 
                             path="/",
                             max_age = 60 * 60 * 24,
                             samesite="none",
-                            httponly=True,
                             secure=True,
                             )
 

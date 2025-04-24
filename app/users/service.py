@@ -1,23 +1,13 @@
-from datetime import timezone
-import secrets
-import bcrypt
-from fastapi import HTTPException, Response, status
+
+from fastapi import Response
 from sqlmodel import Session, select
-from app.auth.models.otp_user_model import RequestOtpModel
-from app.auth.models.reset_password_model import ResetPasswordModel
-from app.auth.models.signin_model import SignInModel
-from app.auth.models.register_user_model import RegisterUserModel
-from app.auth.models.verify_otp_model import VerifyOtpModel
-from app.common.errors.user_error import ExistingEmail, ExpiredOTP, InvalidEmailFormat, InvalidEmailPassword, InvalidOTP, InvalidToken, MaximumAttempOTP, OTPAlreadyVerified, TokenExpired, UserNotFound
-from app.common.jwt import TokenPayload, signJwt
-from app.common.regex import EMAIL_REGEX
-from app.common.time import utc_now
-from app.common.util import generate_otp, generate_otp_reference
-from app.common.email import email_sender
+
+from app.common.errors.user_error import  ExistingEmail, UserNotFound
+from app.common.jwt import TokenPayload
 from app.schemas import User
-from app.schemas.otp import Otp
-from app.schemas.reset_password_session import ResetPasswordSession
+from app.users.models.update_user_model import UpdateUserModel
 from app.users.models.user_response import UserResponse
+
 
 class UserService:
 
@@ -40,6 +30,44 @@ class UserService:
             "user": response,
         }
     
+    async def update_user(self, response: Response, userUpdateModel: UpdateUserModel, current_user: TokenPayload, session: Session):
 
+        user = session.exec(
+            select(User).where(User.id == current_user.user_id)
+        ).first()
+
+        if user is None:
+            raise UserNotFound()
+
+
+        if userUpdateModel.firstname is not None:
+            user.firstname = userUpdateModel.firstname
+
+        if userUpdateModel.lastname is not None:
+            user.lastname = userUpdateModel.lastname
+
+        if userUpdateModel.email is not None:
+
+            exiting_email = session.exec(
+            select(User).where(User.email == userUpdateModel.email)).first()
+
+            if(exiting_email):
+                raise ExistingEmail()
+
+            user.email = userUpdateModel.email
+
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+        return {
+            "message": "User updated successfully",
+            "user": {
+                "id": user.id,
+                "first_name": user.firstname,
+                "last_name": user.lastname,
+                "email": user.email
+            }
+        }
 
 UserService = UserService()

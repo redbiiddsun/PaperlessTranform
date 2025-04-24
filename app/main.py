@@ -5,6 +5,8 @@ from fastapi.responses import JSONResponse
 from app.common.errors.base_http_exception import BaseHTTPException
 from app.database import create_db_and_tables
 from app.auth import auth_router
+from app.users import user_router
+
 
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
@@ -29,6 +31,8 @@ def on_startup():
     create_db_and_tables()
 
 app.include_router(auth_router)
+app.include_router(user_router)
+
 
 @app.exception_handler(BaseHTTPException)
 async def custom_exception_handler(request: Request, exc: BaseHTTPException):

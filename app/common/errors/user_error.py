@@ -77,6 +77,15 @@ class TokenExpired(BaseHTTPException):
                          status="error",
                          detail="Token expired",
                          error_code="ERR_TOKEN_EXPIRED")
+        
+class Unauthorized(BaseHTTPException):
+    def __init__(self, detail: str = "Unauthorized"):
+        super().__init__(status_code = status.HTTP_401_UNAUTHORIZED,
+                         status = "error",
+                         detail = detail,
+                         error_code = "ERR_UNAUTHORIZED")
+        
+    
 
 
                          

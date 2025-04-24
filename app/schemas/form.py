@@ -1,6 +1,6 @@
 import uuid
 
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlmodel import JSON, Column, Field, SQLModel
 
 from app.common.time import utc_now
@@ -12,9 +12,9 @@ class Forms(SQLModel, table=True):
 
     name: str
 
-    schemas: dict = Field(sa_column=Column(JSON), default={})
+    schemas: str = Field(sa_column=Column(JSON), default={})
 
-    userId: uuid.UUID = Field(default=None, foreign_key="user.id")
+    userId: uuid.UUID = Field(foreign_key="user.id")
 
     requiredLogin: bool = Field(default=False)
     

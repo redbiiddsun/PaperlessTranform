@@ -6,6 +6,7 @@ from app.common.errors.base_http_exception import BaseHTTPException
 from app.database import create_db_and_tables
 from app.auth import auth_router
 from app.users import user_router
+from app.form import form_router
 
 
 
@@ -32,6 +33,8 @@ def on_startup():
 
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(form_router)
+
 
 
 @app.exception_handler(BaseHTTPException)

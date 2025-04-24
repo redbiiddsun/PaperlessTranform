@@ -30,7 +30,8 @@ class UserService:
             select(User).where(User.id == current_user.user_id)
         ).first()
 
-        print(type(user_info))
+        if not user_info:
+            raise UserNotFound(user_id=current_user.user_id)
 
         response = UserResponse.model_validate(user_info)
 
@@ -38,6 +39,7 @@ class UserService:
             "status": "success",
             "user": response,
         }
+    
 
 
 UserService = UserService()

@@ -4,6 +4,8 @@ class Settings(BaseSettings):
 
     ENV: str
 
+    DOMAIN: str
+
     DATABASE_USER: str
 
     DATABASE_PASSWORD: str

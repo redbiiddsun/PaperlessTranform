@@ -8,6 +8,7 @@ from app.auth.models.reset_password_model import ResetPasswordModel
 from app.auth.models.signin_model import SignInModel
 from app.auth.models.register_user_model import RegisterUserModel
 from app.auth.models.verify_otp_model import VerifyOtpModel
+from app.common.constance.env import Environment
 from app.common.errors.user_error import ExistingEmail, ExpiredOTP, InvalidEmailFormat, InvalidEmailPassword, InvalidOTP, InvalidToken, MaximumAttempOTP, OTPAlreadyVerified, TokenExpired, Unauthorized, UserNotFound
 from app.common.jwt import TokenPayload, decodeJwt, signJwt
 from app.common.regex import EMAIL_REGEX
@@ -17,6 +18,7 @@ from app.common.email import email_sender
 from app.schemas import User
 from app.schemas.otp import Otp
 from app.schemas.reset_password_session import ResetPasswordSession
+from app.config import settings
 
 class AuthService:
 
@@ -72,14 +74,21 @@ class AuthService:
         if not bcrypt.checkpw(loginModel.password.encode("utf-8"), current_user.password.encode("utf-8")):
             raise InvalidEmailPassword()
         
-        response.set_cookie(key = "session", 
-                            value = signJwt(current_user.id),
-                            domain="api.paperlesstransform.online", 
-                            path="/",
-                            max_age = 60 * 60 * 24,
-                            samesite="none",
-                            secure=True,
-                            )
+        if(settings.ENV == Environment.PRODUCTION):
+            response.set_cookie(key = "session", 
+                                value = signJwt(current_user.id),
+                                domain= settings.DOMAIN, 
+                                path="/",
+                                max_age = 60 * 60 * 24,
+                                samesite="none",
+                                secure=True,
+                                )
+        else:
+            response.set_cookie(key = "session", 
+                                value = signJwt(current_user.id),       
+                                path="/",
+                                max_age = 60 * 60 * 24,
+                                )
 
         return {
             "status": "success",

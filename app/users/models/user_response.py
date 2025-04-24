@@ -1,6 +1,8 @@
 import uuid
 from pydantic import BaseModel
 
+from typing import Optional
+
 
 class UserResponse(BaseModel):
     
@@ -12,3 +14,10 @@ class UserResponse(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class UserUpdateRequest(BaseModel):
+    first_name: Optional[str] = None
+    
+    last_name: Optional[str] = None
+    
+    email: Optional[str] = None

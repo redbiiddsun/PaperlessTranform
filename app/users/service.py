@@ -19,6 +19,12 @@ from app.schemas.otp import Otp
 from app.schemas.reset_password_session import ResetPasswordSession
 from app.users.models.user_response import UserResponse
 
+from passlib.context import CryptContext
+from app.users.schemas.user_request import UserUpdateRequest
+from app.users.models.user import User
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 class UserService:
 
     def __init__(self):
@@ -38,6 +44,33 @@ class UserService:
         return {
             "status": "success",
             "user": response,
+        }
+    
+    async def update_user(payload: UserUpdateRequest, response: Response, current_user: TokenPayload, session: Session):
+        user = session.get(User, current_user.sub)
+        if not user:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {"detail": "User not found"}
+
+        if payload.first_name is not None:
+            user.first_name = payload.first_name
+        if payload.last_name is not None:
+            user.last_name = payload.last_name
+        if payload.email is not None:
+            user.email = payload.email
+
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+        return {
+            "message": "User updated successfully",
+            "user": {
+                "id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "email": user.email
+            }
         }
     
 

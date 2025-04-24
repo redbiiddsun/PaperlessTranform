@@ -1,7 +1,8 @@
-from pydantic import root_validator
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+
+    ENV: str
 
     DATABASE_USER: str
 
@@ -12,8 +13,6 @@ class Settings(BaseSettings):
     DATABASE_PORT: int
 
     DATABASE_NAME: str
-
-    DATABASE_URL: str
 
     SECRET_KEY: str
 

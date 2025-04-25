@@ -40,5 +40,25 @@ class FormService:
             "status": "success",
             "form": new_form,
         }
+    
+    async def receive_form(self, response: Response, current_user: TokenPayload, session: Session):
 
+        user = session.exec(
+            select(User).where(User.id == current_user.user_id)
+        ).first()
+
+        if user is None:
+            raise UserNotFound()
+        
+        all_form = session.exec(
+            select(Forms).where(Forms.userId == current_user.user_id)
+        )
+
+        forms_data = [form.dict() for form in all_form.all()]
+
+
+        return {
+            "status": "success",
+            "form": forms_data,
+        }
 FormService = FormService()

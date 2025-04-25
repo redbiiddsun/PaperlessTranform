@@ -16,11 +16,13 @@ class FormRouter:
         self.register_routes()
 
     def register_routes(self):
+        self.router.add_api_route("", self.receive_form, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("", self.add_form, methods=["POST"], status_code=status.HTTP_200_OK)
 
     async def add_form(self, response: Response, addFormModel: AddFormModel, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
         return await FormService.add_form(response, addFormModel, current_user, session)
 
-
+    async def receive_form(self, response: Response, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
+        return await FormService.receive_form(response, current_user, session)
 
 form_router = FormRouter().router

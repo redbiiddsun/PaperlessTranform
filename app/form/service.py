@@ -1,4 +1,5 @@
 
+import uuid
 from fastapi import Response
 from sqlmodel import Session, select
 
@@ -60,5 +61,23 @@ class FormService:
         return {
             "status": "success",
             "form": forms_data,
+        }
+    
+    async def receive_form_with_id(self, form_id: uuid.UUID,current_user: TokenPayload, session: Session):
+
+        user = session.exec(
+            select(User).where(User.id == current_user.user_id)
+        ).first()
+
+        if user is None:
+            raise UserNotFound()
+        
+        form = session.exec(
+            select(Forms).where(Forms.userId == current_user.user_id, Forms.id == form_id)
+        ).first()
+
+        return {
+            "status": "success",
+            "form": form,
         }
 FormService = FormService()

@@ -3,6 +3,7 @@ import uuid
 from fastapi import Response
 from sqlmodel import Session, select
 
+from app.common.errors.form_error import FormNotFound
 from app.common.errors.user_error import  ExistingEmail, UserNotFound
 from app.common.jwt import TokenPayload
 from app.form.models.add_form_model import AddFormModel
@@ -78,6 +79,31 @@ class FormService:
 
         return {
             "status": "success",
+            "form": form,
+        }
+    
+    async def delete_form(self, form_id: uuid.UUID,current_user: TokenPayload, session: Session):
+
+        user = session.exec(
+            select(User).where(User.id == current_user.user_id)
+        ).first()
+
+        if user is None:
+            raise UserNotFound()
+        
+        form = session.exec(
+            select(Forms).where(Forms.userId == current_user.user_id, Forms.id == form_id)
+        ).first()
+
+        if form is None:
+            raise FormNotFound()
+        
+        session.delete(form)
+        session.commit()
+
+        return {
+            "status": "success",
+            "message": "Form deleted successfully",
             "form": form,
         }
 FormService = FormService()

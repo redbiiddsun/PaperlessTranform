@@ -20,6 +20,8 @@ class FormRouter:
         self.router.add_api_route("", self.receive_form, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("/{form_id}", self.receive_form_with_id, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("", self.add_form, methods=["POST"], status_code=status.HTTP_200_OK)
+        self.router.add_api_route("/{form_id}", self.delete_form, methods=["DELETE"], status_code=status.HTTP_200_OK)
+
 
     async def add_form(self, response: Response, addFormModel: AddFormModel, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
         return await FormService.add_form(response, addFormModel, current_user, session)
@@ -29,5 +31,9 @@ class FormRouter:
     
     async def receive_form_with_id(self, form_id: uuid.UUID, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
         return await FormService.receive_form_with_id(form_id, current_user, session)
+    
+    async def delete_form(self, form_id: uuid.UUID, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
+        return await FormService.delete_form(form_id, current_user, session)
+    
 
 form_router = FormRouter().router

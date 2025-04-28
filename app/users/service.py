@@ -27,7 +27,7 @@ class UserService:
 
         return {
             "status": "success",
-            "user": response,
+            "content": response,
         }
     
     async def update_user(self, response: Response, userUpdateModel: UpdateUserModel, current_user: TokenPayload, session: Session):
@@ -62,7 +62,7 @@ class UserService:
 
         return {
             "message": "User updated successfully",
-            "user": {
+            "content": {
                 "id": user.id,
                 "first_name": user.firstname,
                 "last_name": user.lastname,

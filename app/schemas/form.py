@@ -12,8 +12,8 @@ class Forms(SQLModel, table=True):
 
     name: str
 
-    schemas: str = Field(sa_column=Column(JSON), default={})
-
+    schemas: list = Field(sa_column=Column(JSON), default={})
+    
     userId: uuid.UUID = Field(foreign_key="user.id")
 
     requiredLogin: bool = Field(default=False)

@@ -190,6 +190,10 @@ class AuthService:
             select(ResetPasswordSession).where(ResetPasswordSession.token == resetPasswordModel.token)
         ).first()
 
+        if(current_session is None):
+            print("Can not find token")
+            raise InvalidToken()
+
         current_session_user = session.exec(
             select(User).where(User.id == current_session.userId)
         ).first()

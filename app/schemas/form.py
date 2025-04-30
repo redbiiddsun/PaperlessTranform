@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlmodel import JSON, Column, Field, SQLModel
 
 from app.common.time import utc_now
+from app.form.models.schema_item_model import SchemaItem
 
 class Forms(SQLModel, table=True):
     __tablename__ = "form"
@@ -12,7 +13,7 @@ class Forms(SQLModel, table=True):
 
     name: str
 
-    schemas: str = Field(sa_column=Column(JSON), default={})
+    schemas: list = Field(sa_column=Column(JSON), default={})
 
     userId: uuid.UUID = Field(foreign_key="user.id")
 

@@ -1,12 +1,10 @@
-from typing import Any, Dict, Optional
-from pydantic import BaseModel, Json
-
-from app.form.models.schema_item_model import SchemaItem
+from typing import Optional
+from pydantic import BaseModel
 
 class AddFormModel(BaseModel):
 
     name: str
 
-    schemas: list[SchemaItem]
+    schemas: str
     
     requiredLogin: Optional[bool] = False

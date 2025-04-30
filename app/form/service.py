@@ -1,4 +1,5 @@
 
+import json
 import uuid
 from fastapi import Response
 from sqlmodel import Session, select
@@ -20,6 +21,8 @@ class FormService:
 
     async def add_form(self, response: Response, addFormModel: AddFormModel, current_user: TokenPayload, session: Session):
 
+        # original_addFormModel = addFormModel.model_dump(by_alias=True)
+
         user = session.exec(
             select(User).where(User.id == current_user.user_id)
         ).first()
@@ -29,7 +32,7 @@ class FormService:
         
         new_form = Forms(
             name = addFormModel.name,
-            schemas = addFormModel.schemas,
+            schemas = addFormModel.model_dump(by_alias=True).get("schemas"),
             requiredLogin = addFormModel.requiredLogin,
             userId = user.id,
         )

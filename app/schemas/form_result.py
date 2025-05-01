@@ -10,7 +10,7 @@ class FormResult(SQLModel, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
-    formId: uuid.UUID = Field(default=None, foreign_key="form.id")
+    formId: uuid.UUID = Field(default=None, foreign_key="form.id", ondelete="CASCADE")
 
     userId: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id", nullable=True)
 

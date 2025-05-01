@@ -137,4 +137,34 @@ class FormService:
             "message": "Form has been submitted successfully",
         }
     
+
+    async def receive_form_result(self, form_id: uuid.UUID, current_user: TokenPayload, session: Session):
+
+        user = session.exec(
+            select(User).where(User.id == current_user.user_id)
+        ).first()
+
+        if user is None:
+            raise UserNotFound()
+            
+        form = session.exec(
+            select(Forms).where(Forms.id == form_id)
+        ).first()
+
+        if form is None:
+            raise FormNotFound()
+        
+        form_result = session.exec(
+            select(FormResult).where(FormResult.formId == form_id)
+        ).all()
+
+        results_only = [item.result for item in form_result]
+
+        return {
+            "status": "success",
+            "form_result": results_only,
+        }
+            
+        
+    
 FormService = FormService()

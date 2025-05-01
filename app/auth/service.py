@@ -242,5 +242,24 @@ class AuthService:
             raise Unauthorized()
 
         return token_data
+    
+    @staticmethod
+    def get_optional_current_user(token: str = Cookie(None, alias="session")) -> TokenPayload:
+
+        if not token:
+            return None
+
+        token_data = decodeJwt(token)
+
+        if token_data is None:
+            raise Unauthorized()
+            
+        if token_data.expired < int(utc_now().timestamp()):
+            raise Unauthorized()
+
+        if token_data.user_id is None:
+            raise Unauthorized()
+
+        return token_data
             
 AuthService = AuthService()

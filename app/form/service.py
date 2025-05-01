@@ -7,8 +7,10 @@ from app.common.errors.form_error import FormNotFound
 from app.common.errors.user_error import  ExistingEmail, UserNotFound
 from app.common.jwt import TokenPayload
 from app.form.models.add_form_model import AddFormModel
+from app.form.models.submit_form_model import SubmitFormModel
 from app.schemas import User
 from app.schemas.form import Forms
+from app.schemas.form_result import FormResult
 from app.users.models.update_user_model import UpdateUserModel
 from app.users.models.user_response import UserResponse
 
@@ -100,6 +102,39 @@ class FormService:
             "status": "success",
             "message": "Form deleted successfully",
             "form": form,
+        }
+    
+    async def submit_form(self, form_id: uuid.UUID, submitFormModel: SubmitFormModel, current_user: TokenPayload, session: Session):
+
+        if current_user is not None:
+
+            user = session.exec(
+                select(User).where(User.id == current_user.user_id)
+            ).first()
+
+            if user is None:
+                raise UserNotFound()
+            
+        form = session.exec(
+            select(Forms).where(Forms.id == form_id)
+        ).first()
+
+        if form is None:
+            raise FormNotFound()
+            
+        new_form_result = FormResult(
+            formId = form_id,
+            userId = current_user.user_id if current_user is not None else None,
+            result = submitFormModel.model_dump(by_alias=True).get("data"),
+        )
+
+        session.add(new_form_result)
+        session.commit()
+        session.refresh(new_form_result)
+
+        return {
+            "status": "success",
+            "message": "Form has been submitted successfully",
         }
     
 FormService = FormService()

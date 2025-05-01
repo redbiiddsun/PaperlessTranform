@@ -1,7 +1,7 @@
 import uuid
 
 from datetime import datetime
-from sqlmodel import JSON, Column, Field, SQLModel
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
 from app.common.time import utc_now
 
@@ -21,4 +21,7 @@ class Forms(SQLModel, table=True):
     createdAt: datetime = Field(default_factory=utc_now)
 
     updatedAt: datetime = Field(default_factory=utc_now)
+
+    # Relationships
+    formResult: list["FormResult"] = Relationship(cascade_delete=True)
     

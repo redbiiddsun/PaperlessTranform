@@ -135,7 +135,6 @@ class FormService:
         return {
             "status": "success",
             "message": "Form has been submitted successfully",
-            "form": new_form_result,
         }
     
 FormService = FormService()

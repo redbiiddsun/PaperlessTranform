@@ -63,18 +63,14 @@ class FormService:
             "form": forms_data,
         }
     
-    async def receive_form_with_id(self, form_id: uuid.UUID,current_user: TokenPayload, session: Session):
-
-        user = session.exec(
-            select(User).where(User.id == current_user.user_id)
-        ).first()
-
-        if user is None:
-            raise UserNotFound()
+    async def receive_form_with_id(self, form_id: uuid.UUID, session: Session):
         
         form = session.exec(
-            select(Forms).where(Forms.userId == current_user.user_id, Forms.id == form_id)
+            select(Forms).where(Forms.id == form_id)
         ).first()
+
+        if form is None:
+            raise FormNotFound()
 
         return {
             "status": "success",
@@ -105,4 +101,5 @@ class FormService:
             "message": "Form deleted successfully",
             "form": form,
         }
+    
 FormService = FormService()

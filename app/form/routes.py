@@ -29,8 +29,8 @@ class FormRouter:
     async def receive_form(self, response: Response, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
         return await FormService.receive_form(response, current_user, session)
     
-    async def receive_form_with_id(self, form_id: uuid.UUID, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
-        return await FormService.receive_form_with_id(form_id, current_user, session)
+    async def receive_form_with_id(self, form_id: uuid.UUID, session: Session = Depends(get_session)):
+        return await FormService.receive_form_with_id(form_id, session)
     
     async def delete_form(self, form_id: uuid.UUID, current_user: TokenPayload = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
         return await FormService.delete_form(form_id, current_user, session)

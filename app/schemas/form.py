@@ -13,6 +13,10 @@ class Forms(SQLModel, table=True):
     name: str
 
     schemas: list = Field(sa_column=Column(JSON), default={})
+
+    width: str
+
+    description: str | None = Field(default=None)
     
     userId: uuid.UUID = Field(foreign_key="user.id")
 

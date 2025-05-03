@@ -7,6 +7,10 @@ class AddFormModel(BaseModel):
 
     name: str
 
-    schemas: list[SchemaItem]
-        
+    description: str
+
+    width: str
+       
     requiredLogin: Optional[bool] = False
+
+    schemas: list[SchemaItem]

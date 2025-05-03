@@ -8,7 +8,7 @@ class SchemaItem(BaseModel):
 
     name: str
 
-    desciption: str | None = None
+    description: str | None = None
 
     label: str
 
@@ -17,5 +17,3 @@ class SchemaItem(BaseModel):
     outerClass: str
     
     help: str | None = None
-
-    width: str

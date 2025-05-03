@@ -31,7 +31,10 @@ class FormService:
         
         new_form = Forms(
             name = addFormModel.name,
-            schemas = addFormModel.model_dump(by_alias=True).get("schemas"),            requiredLogin = addFormModel.requiredLogin,
+            schemas = addFormModel.model_dump(by_alias=True).get("schemas"),
+            description = addFormModel.description,
+            width = addFormModel.width,   
+            requiredLogin = addFormModel.requiredLogin,
             userId = user.id,
         )
 

@@ -15,5 +15,7 @@ class SchemaItem(BaseModel):
     value: str
     
     outerClass: str
+
+    validation: str | None = None
     
     help: str | None = None

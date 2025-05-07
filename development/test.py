@@ -1,38 +1,70 @@
-import pprint
-from text_extraction.PDF import PDFExtractor
-from parse.parse import TextParse
-from translation.translation import Translation
-from DataTypeAnalyzer.data_type_analyzer import DataTypeAnalyzer
+import cv2
+import pytesseract
+from pdf2image import convert_from_path
+import numpy as np
 
-def print_section(title: str):
-    print(f"\n{'=' * 40}")
-    print(f"{title}")
-    print(f"{'=' * 40}")
+# Convert PDF to images
+pdf_path = './file/dot_input/Complain.pdf'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+poppler_path = r'C:\Users\Pra_p\Downloads\Release-24.08.0-0\poppler-24.08.0\Library\bin'
 
-if __name__ == '__main__':
-    pp = pprint.PrettyPrinter(indent=4, width=100, compact=False)
+images = convert_from_path(pdf_path, poppler_path=poppler_path)
 
-    print_section("1. Extracting Text from PDF")
-    pdf_text = PDFExtractor().extract_text("./file/Government/th/ใบคําร้องขอเลขรหัสประจําบ้าน.pdf")
-    # pdf_text = PDFExtractor().extract_text("./file/ใบลาออก.pdf")
-    pp.pprint(pdf_text)
+for page_num, image in enumerate(images):
+    img = np.array(image)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    # Adaptive thresholding
+    binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
-    print_section("2. Parsing Labels from Extracted Text")
-    extracted_labels = TextParse.extract_labels(pdf_text)
-    pp.pprint(extracted_labels)
+    # Find contours for checkboxes
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    print_section("3. Translating Parsed Labels")
-    translated_labels = Translation().translate(extracted_labels)
-    pp.pprint(translated_labels)
+    checkbox_regions = []
+    options = []
+    
+    # Get image dimensions
+    img_height, img_width = img.shape[:2]
+    min_size = 0.01
+    max_size = 0.05
+    
+    min_w = img_width * min_size
+    max_w = img_width * max_size
+    min_h = img_height * min_size
+    max_h = img_height * max_size
 
-    translated_fields = [item['translated_field'] for item in translated_labels]
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        aspect_ratio = w / float(h)
+        area = cv2.contourArea(cnt)
+        
+        if (min_w <= w <= max_w and min_h <= h <= max_h) and (0.3 <= aspect_ratio <= 3.0) and area > 500:
+            checkbox_regions.append((x, y, w, h))
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    print_section("4. Extracted Translated Fields (for Analysis)")
-    pp.pprint(translated_fields)
+            # Extract option text next to the checkbox
+            option_x = x + w
+            option_y = y - 10
+            option_w = 200
+            option_h = h + 10
 
-    print_section("5. Analyzing Data Types")
-    try:
-        data_types = DataTypeAnalyzer().analyze_fields(translated_fields)
-        pp.pprint(data_types)
-    except Exception as e:
-        print(f"❌ Failed to analyze data types: {e}")
+            option_roi = gray[option_y:option_y+option_h, option_x:option_x+option_w]
+            option_text = pytesseract.image_to_string(option_roi, lang='tha', config='--psm 6')
+
+            # Postprocessing: Strip spaces and check for whitespace between characters
+            options.append(option_text.strip())
+
+    # OCR extraction for full page
+    extracted_text = pytesseract.image_to_string(gray, lang='tha', config='--psm 6') 
+
+    print("Extracted text:", extracted_text)
+    print("Detected Checkboxes:", checkbox_regions)
+    print(f"Number of detected checkboxes: {len(checkbox_regions)}")
+    print("Detected options:")
+    for idx, option in enumerate(options):
+        print(f"Option {idx + 1}: {option}")
+
+    # Show detected checkboxes on the image
+    cv2.imshow(f'Page {page_num + 1}', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

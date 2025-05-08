@@ -167,6 +167,20 @@ class FormService:
             "status": "success",
             "form_result": results_only,
         }
+    
+    async def upload_pdf_form(self, current_user: TokenPayload, session: Session):
+
+        user = session.exec(
+            select(User).where(User.id == current_user.user_id)
+        ).first()
+
+        if user is None:
+            raise UserNotFound()
+
+        return {
+            "status": "success",
+            "file": "results_only",
+        }
             
         
     

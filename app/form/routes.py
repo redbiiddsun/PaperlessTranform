@@ -22,6 +22,9 @@ class FormRouter:
         self.router.add_api_route("", self.receive_form, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("", self.add_form, methods=["POST"], status_code=status.HTTP_200_OK)
 
+        self.router.add_api_route("/upload", self.upload_pdf_form, methods=["POST"], status_code=status.HTTP_200_OK)
+
+
         self.router.add_api_route("/{form_id}", self.receive_form_with_id, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("/{form_id}", self.delete_form, methods=["DELETE"], status_code=status.HTTP_200_OK)
 
@@ -48,6 +51,9 @@ class FormRouter:
     
     async def receive_form_result(self, form_id: uuid.UUID, current_user: Optional[TokenPayload] = Depends(AuthService.get_optional_current_user), session: Session = Depends(get_session)):
         return await FormService.receive_form_result(form_id, current_user, session)
+    
+    async def upload_pdf_form(self, current_user: Optional[TokenPayload] = Depends(AuthService.get_optional_current_user), session: Session = Depends(get_session)):
+        return await FormService.upload_pdf_form(current_user, session)
     
 
 form_router = FormRouter().router

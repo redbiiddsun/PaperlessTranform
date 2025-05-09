@@ -187,11 +187,11 @@ class FormService:
 
         extracted_text = TextParse.extract_labels(pdf_text)
 
-        translated_text = Translation().translate(extracted_text)
+        translated_text = await Translation().translate(extracted_text)
 
         translated_fields = [item['translated_field'] for item in translated_text]
 
-        data_type = DataTypeAnalyzer().analyze_fields(translated_fields)
+        data_type = await DataTypeAnalyzer().analyze_fields_async(translated_fields)
 
         mapping_value = DataTypeAnalyzer().mapping_value(data_type, translated_text)
 

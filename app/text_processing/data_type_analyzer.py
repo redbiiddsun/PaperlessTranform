@@ -1,4 +1,6 @@
 import ast
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import json
 import re
 from typing import List
@@ -10,6 +12,7 @@ class DataTypeAnalyzer(LlamaWrapper):
 
     def __init__(self, model_name: str = 'llama3:8b'):
         super().__init__()
+        self.executor = ThreadPoolExecutor()
         self.model_name = model_name
         self.system_prompt = """You are a data type analyzer. Your task is to analyze input fields and return their data types in a consistent JSON schema format. 
         Always return valid JSON as an array of objects with these exact fields for each input:
@@ -158,6 +161,12 @@ class DataTypeAnalyzer(LlamaWrapper):
                 f"Error decoding JSON: {str(e)}. Raw response: '{response['message']['content']}'")
         except Exception as e:
             raise Exception(f"Error analyzing fields: {str(e)}")
+        
+    async def analyze_fields_async(self, fields: str | List[str]) -> object:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(self.executor, self.analyze_fields, fields)
+        
+        
 
     def cleaning_data(self, data: str) -> str:
         match = re.search(r'\[(.*)\]', data, re.DOTALL)

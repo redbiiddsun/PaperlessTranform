@@ -1,3 +1,5 @@
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 
@@ -18,22 +20,28 @@ class Translation:
             max_length=1024,
             device=self.device
         )
+        self.executor = ThreadPoolExecutor()
+        
 
-    def translate(self, text):
-
+    def _translate_sync(self, text):
         result = []
 
-        if(type(text) == list):
+        if isinstance(text, list):
             for original_text in text:
-
                 translated_text = self.translation_pipeline(original_text)
-
-                result.append({"original_field": original_text, "translated_field": translated_text[0]['translation_text']})
-                
+                result.append({
+                    "original_field": original_text,
+                    "translated_field": translated_text[0]['translation_text']
+                })
             return result
 
         single_translated_text = self.translation_pipeline(text)
         return single_translated_text[0]['translation_text']
 
+    async def translate(self, text):
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(self.executor, self._translate_sync, text)
+
     def __str__(self):
         return f"Translation from {self.source_language} to {self.target_language}"
+    

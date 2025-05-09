@@ -1,6 +1,7 @@
 
+import pprint
 import uuid
-from fastapi import Response
+from fastapi import Response, UploadFile
 from sqlmodel import Session, select
 
 from app.common.errors.form_error import FormNotFound
@@ -11,9 +12,12 @@ from app.form.models.submit_form_model import SubmitFormModel
 from app.schemas import User
 from app.schemas.form import Forms
 from app.schemas.form_result import FormResult
+from app.text_processing.data_type_analyzer import DataTypeAnalyzer
+from app.text_processing.form import TextParse
+from app.text_processing.translation import Translation
 from app.users.models.update_user_model import UpdateUserModel
 from app.users.models.user_response import UserResponse
-
+from app.text_processing.pdf_extractor import PDFExtractor
 
 class FormService:
 
@@ -168,7 +172,7 @@ class FormService:
             "form_result": results_only,
         }
     
-    async def upload_pdf_form(self, current_user: TokenPayload, session: Session):
+    async def upload_pdf_form(self, file: UploadFile, current_user: TokenPayload, session: Session):
 
         user = session.exec(
             select(User).where(User.id == current_user.user_id)
@@ -176,12 +180,24 @@ class FormService:
 
         if user is None:
             raise UserNotFound()
+        
+        file_bytes = await file.read()
+
+        pdf_text = PDFExtractor().extract_text(file_bytes)
+
+        extracted_text = TextParse.extract_labels(pdf_text)
+
+        translated_text = Translation().translate(extracted_text)
+
+        translated_fields = [item['translated_field'] for item in translated_text]
+
+        data_type = DataTypeAnalyzer().analyze_fields(translated_fields)
+
+        mapping_value = DataTypeAnalyzer().mapping_value(data_type, translated_text)
 
         return {
             "status": "success",
-            "file": "results_only",
+            "result": mapping_value,
         }
-            
-        
-    
+
 FormService = FormService()

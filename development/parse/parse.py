@@ -59,5 +59,8 @@ class TextParse():
 
                 label.append(clear_text)
 
-        return label
+            filtered_list = [item for item in label if item.strip() != ""]
+
+
+        return filtered_list
 

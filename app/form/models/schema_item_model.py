@@ -12,7 +12,7 @@ class SchemaItem(BaseModel):
 
     label: str
 
-    value: str
+    value: str | None = None
     
     outerClass: str
 

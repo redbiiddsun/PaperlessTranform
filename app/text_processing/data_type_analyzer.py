@@ -16,7 +16,7 @@ class DataTypeAnalyzer(LlamaWrapper):
         self.model_name = model_name
         self.system_prompt = """You are a data type analyzer. Your task is to analyze input fields and return their data types in a consistent JSON schema format. 
         Always return valid JSON as an array of objects with these exact fields for each input:
-            - field: the input fields that has been given by the user       
+            - field: the exact input fields that has been given by the user       
             - type: the fundamental data type (use only: text, number, tel, email, textarea, time, datetime-local, date)
             - validation: the validation rules as a string (e.g., required|length:1,255)
         Here are the supported data types:
@@ -132,7 +132,9 @@ class DataTypeAnalyzer(LlamaWrapper):
         if isinstance(fields, list):
             fields = ', '.join(fields)
 
-        user_prompt = f"Generate a JSON schema for these fields: {fields}"
+        print("Fields: ", fields)
+
+        user_prompt = f"Generate a JSON schema for these fields (DO NOT CHANGE A FIELD NAME): {fields}"
 
         messages = [
             {"role": "system", "content": self.system_prompt},
@@ -215,13 +217,30 @@ class DataTypeAnalyzer(LlamaWrapper):
 
     def mapping_value(self, data_type, translated_text):
 
-        for index, item in enumerate(data_type):
+        print("Data Type: ", len(data_type))
+        print("Translated Text: ", len(translated_text))
 
-            for translate_obj in translated_text:
+        print("Data Type: ", data_type)
+        print("Translated Text: ", translated_text)
 
-                if item['field'] == translate_obj['translated_field']:
-                    
-                    data_type[index]['original_field'] = translate_obj['original_field']
-                    break
+        if  len(data_type) != len((translated_text)):
+            for index, item in enumerate(data_type):
+
+                for translate_obj in translated_text:
+
+                    if item['field'] == translate_obj['translated_field']:
+                        
+                        data_type[index]['original_field'] = translate_obj['original_field']
+                        break
+
+            return data_type
+        
+        for index, text in enumerate(translated_text):
+
+            data_type[index]['original_field'] = text['original_field']
 
         return data_type
+
+
+        
+

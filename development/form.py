@@ -121,16 +121,29 @@ class Form:
                 continue
                        
             # Check if the current line has start dots/underscore/dash but the prvious line ends with a dots/underscore/dash
-            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous()) and ctx.previous()[-1] in FormType.all_value()):
+            # Support this case
+            #     Name............Surname...................... (prev)
+            #     .............................................. (curr)
+            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous()) and ctx.previous()[-1] in form_type):
                 continue
 
             # Check if the current line has start dots/underscore/dash but the prvious line ends with a dots/underscore/dash
-            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous()) and re.search(r'\s*:\s*', text)):
-                label.append(ctx.previous(2))
-
-                        # Check if the current line has start dots/underscore/dash but the prvious line ends with a dots/underscore/dash
+            # Support this case
+            #  3. Permanent Address    
+            #
+            #  : ______________________________________________ 
+            #
             if re.match(r"^:\s*" + re.escape(form_type) + r"+", ctx.current()):
                 label.append(ctx.previous())
+
+            # Check if the current line has start dots/underscore/dash but the prvious line ends with single colon, it will look back 2 previous lines and get the value
+            # Support this case
+            #  3. Permanent Address    
+            #  :
+            #  ______________________________________________ 
+            #
+            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous()) and re.search(r'\s*:\s*', text)):
+                label.append(ctx.previous(2))
 
             # Check if the current start line has 3 or more dots and the previous line is end with a character
             # EX of the case.
@@ -179,4 +192,13 @@ class Form:
 
                 label.append(clear_text)
 
-        return label
+        filtered_list = [item for item in label if item.strip() != ""]
+
+        for index, text in enumerate(filtered_list):
+            filtered_list[index] = self.remove_private_use_characters(text)
+        
+        return filtered_list
+    
+    def remove_private_use_characters(self, text):
+        return ''.join(c for c in text if not ('\uE000' <= c <= '\uF8FF'))
+

@@ -2,7 +2,8 @@ from enum import Enum
 import re
 import string
 
-from app.text_processing.text_utill import LineContext
+from text_utill import LineContext
+
 
 class FormType(Enum):
     DASH = "-"

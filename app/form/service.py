@@ -13,7 +13,7 @@ from app.schemas import User
 from app.schemas.form import Forms
 from app.schemas.form_result import FormResult
 from app.text_processing.data_type_analyzer import DataTypeAnalyzer
-from app.text_processing.form import TextParse
+from app.text_processing.form import Form
 from app.text_processing.translation import Translation
 from app.users.models.update_user_model import UpdateUserModel
 from app.users.models.user_response import UserResponse
@@ -185,7 +185,7 @@ class FormService:
 
         pdf_text = PDFExtractor().extract_text(file_bytes)
 
-        extracted_text = TextParse.extract_labels(pdf_text)
+        extracted_text = Form().extract_labels(pdf_text)
 
         translated_text = await Translation().translate(extracted_text)
 

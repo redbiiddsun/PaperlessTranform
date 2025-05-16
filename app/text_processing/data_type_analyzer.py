@@ -6,7 +6,8 @@ import re
 from typing import List
 from jsonschema import validate
 
-from development.DataTypeAnalyzer.llama_wraper import LlamaWrapper
+from app.text_processing.llama_wraper import LlamaWrapper
+
 
 class DataTypeAnalyzer(LlamaWrapper):
 

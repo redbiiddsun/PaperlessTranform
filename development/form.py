@@ -124,8 +124,20 @@ class Form:
             # Support this case
             #     Name............Surname...................... (prev)
             #     .............................................. (curr)
-            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous()) and ctx.previous()[-1] in form_type):
+            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous())):
+
+                # Check a prev line if it has a form type text or not
+                check_prev = re.search(r"\S(?=\s*$)", ctx.previous()[-3])
+
+                # Check None to prevent error
+                if check_prev:
+                    check_prev = check_prev.group()
+
+                    if check_prev in form_type:
+                        continue
+            
                 continue
+            
 
             # Check if the current line has start dots/underscore/dash but the prvious line ends with a dots/underscore/dash
             # Support this case
@@ -134,6 +146,7 @@ class Form:
             #  : ______________________________________________ 
             #
             if re.match(r"^:\s*" + re.escape(form_type) + r"+", ctx.current()):
+                print("Found from case 1 : ", ctx.current())
                 label.append(ctx.previous())
 
             # Check if the current line has start dots/underscore/dash but the prvious line ends with single colon, it will look back 2 previous lines and get the value
@@ -142,7 +155,8 @@ class Form:
             #  :
             #  ______________________________________________ 
             #
-            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous()) and re.search(r'\s*:\s*', text)):
+            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (re.search(r'\s*:\s*', text)):
+                print("Found from case 2 : ", ctx.current())
                 label.append(ctx.previous(2))
 
             # Check if the current start line has 3 or more dots and the previous line is end with a character

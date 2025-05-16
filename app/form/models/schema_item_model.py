@@ -19,3 +19,5 @@ class SchemaItem(BaseModel):
     validation: str | None = None
     
     help: str | None = None
+
+    options: list[str] | None = None

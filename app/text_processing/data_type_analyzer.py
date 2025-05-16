@@ -49,7 +49,7 @@ class DataTypeAnalyzer(LlamaWrapper):
         ```
 
     3. `"tel"`
-    - Description: A phone number, can include international format.
+    - Description: Only a phone number, can include international format.
     - Schema Format:
         ```json
         {

@@ -7,7 +7,7 @@ from DataTypeAnalyzer.data_type_analyzer import DataTypeAnalyzer
 
 if __name__ == '__main__':
 
-    pdf_reader = PDFExtractor().extract_text("./file/dot_input/แบบฟอร์ม_ประกาศ.pdf")
+    pdf_reader = PDFExtractor().extract_text("./file/dot_input/แบบฟอร์มผู้ป่วยใหม่.pdf")
 
     print(pdf_reader)
 

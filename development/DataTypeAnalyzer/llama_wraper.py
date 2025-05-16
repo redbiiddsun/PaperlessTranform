@@ -1,3 +1,4 @@
+import torch
 from abc import abstractmethod
 from typing import List, Dict
 from ollama import chat, ChatResponse
@@ -8,7 +9,7 @@ class LlamaWrapper():
     """
     
     def __init__(self):
-        self.model_name = 'llama3.2'
+        self.model_name = 'llama3:8b'
 
     def set_model(self, model_name: str) -> None:
         self.model_name = model_name

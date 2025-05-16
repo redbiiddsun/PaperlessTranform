@@ -18,20 +18,17 @@ def get_all_relative_files(folder_path):
 # Example usage
 if __name__ == "__main__":
 
-    list = []
-
     folder_path = "file/"
 
     if os.path.exists(folder_path) and os.path.isdir(folder_path):
         all_files = get_all_relative_files(folder_path)
 
-        with open("output.csv", "w", encoding="utf-8", newline='') as f:  # Fix: added newline=''
+        with open("output2.csv", "w", encoding="utf-8", newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(["File", "Extracted Text", "Actual Text", "Evaluation"])  # Header row
+            writer.writerow(["File", "Extracted Label", "Actual Label", "Accuracy(%)"])  # Header row
 
             for file in all_files:
-
-                if not file[-4:] == ".pdf":
+                if not file.lower().endswith(".pdf"):
                     continue
 
                 print(folder_path + file)
@@ -39,10 +36,11 @@ if __name__ == "__main__":
                 no_newline_text_extraction = "\n".join([line for line in text_extraction.splitlines() if line.strip()])
 
                 labels = Form().extract_labels(text_extraction)
+                formatted_labels = "\n".join(labels)  # Format labels to be readable
 
-                writer.writerow([file , no_newline_text_extraction,""])
+                writer.writerow([file, formatted_labels, "", ""])
 
-        print(len(list))
+        print("Process completed.")
 
     else:
         print("Invalid folder path.")

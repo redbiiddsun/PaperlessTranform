@@ -48,6 +48,13 @@ class Form:
         """Removes numbering from strings formatted as '1. Name' or '(1) Name'."""
         return re.sub(r"^\(?\d+\)?\.\s*|\(?\d+\)\s*", "", text)
     
+    def get_last_non_blank_char(self, text: str) -> str:
+        # Remove trailing whitespace
+        trimmed = text.rstrip()
+    
+        # Return the last character, or empty string if none exist
+        return trimmed[-1] if trimmed else ""
+    
     def split_line_text(self, text: str) -> list[str]:
         return [line for line in text.splitlines() if line.strip()]
 
@@ -127,7 +134,7 @@ class Form:
             if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (bool(ctx.previous())):
 
                 # Check a prev line if it has a form type text or not
-                check_prev = re.search(r"\S(?=\s*$)", ctx.previous()[-3])
+                check_prev = re.search(r"\S(?=\s*$)", self.get_last_non_blank_char(ctx.previous()))
 
                 # Check None to prevent error
                 if check_prev:
@@ -206,13 +213,48 @@ class Form:
 
                 label.append(clear_text)
 
-        filtered_list = [item for item in label if item.strip() != ""]
+        # filtered_list = [item for item in label if item.strip() != ""]
 
-        for index, text in enumerate(filtered_list):
-            filtered_list[index] = self.remove_private_use_characters(text)
-        
-        return filtered_list
+        # for index, text in enumerate(filtered_list):
+        #     filtered_list[index] = self.remove_private_use_characters(text)
+        #         
+        return self.clean_all_nonlabel_text(label)
+
     
     def remove_private_use_characters(self, text):
         return ''.join(c for c in text if not ('\uE000' <= c <= '\uF8FF'))
+    
+    def is_all_underscores_or_dots(self, text):
+        return set(text).issubset(FormType.all_value())
+    
+    def remove_trailing_semicolon(text):
+        stripped = text.rstrip()  # Remove trailing whitespace temporarily
+        if stripped.endswith(';'):
+            stripped = stripped[:-1]  # Remove the semicolon
+            # Add back the original number of trailing spaces (if any)
+            return stripped + text[len(stripped)+1:]
+        return text
+    
+    def clean_trailing_colon_and_spaces(self, text):
+        text = text.rstrip()  # Remove trailing spaces
+        if text.endswith(':'):
+            text = text[:-1]  # Remove the semicolon
+        return text
+    
+    def clean_all_nonlabel_text(self, list_text: list[str]) -> str:
 
+        for index, text in enumerate(list_text):
+
+            if text.strip() == "":
+                list_text.pop(index)
+                continue
+
+            if self.is_all_underscores_or_dots(text):
+                list_text.pop(index)
+                continue
+            
+            list_text[index] = self.remove_private_use_characters(text)
+
+            list_text[index] = self.clean_trailing_colon_and_spaces(text)
+
+            return list_text

@@ -1,4 +1,3 @@
-import torch
 from abc import abstractmethod
 from typing import List, Dict
 from ollama import chat, ChatResponse

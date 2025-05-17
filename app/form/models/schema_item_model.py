@@ -12,10 +12,12 @@ class SchemaItem(BaseModel):
 
     label: str
 
-    value: str
+    value: str | None = None
     
     outerClass: str
 
     validation: str | None = None
     
     help: str | None = None
+
+    options: list[str] | None = None

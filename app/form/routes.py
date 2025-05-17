@@ -1,6 +1,6 @@
 from typing import Optional
 import uuid
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, UploadFile, status
 from sqlmodel import Session
 
 from app.auth.service import AuthService
@@ -21,6 +21,9 @@ class FormRouter:
     def register_routes(self):
         self.router.add_api_route("", self.receive_form, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("", self.add_form, methods=["POST"], status_code=status.HTTP_200_OK)
+
+        self.router.add_api_route("/upload", self.upload_pdf_form, methods=["POST"], status_code=status.HTTP_200_OK)
+
 
         self.router.add_api_route("/{form_id}", self.receive_form_with_id, methods=["GET"], status_code=status.HTTP_200_OK)
         self.router.add_api_route("/{form_id}", self.delete_form, methods=["DELETE"], status_code=status.HTTP_200_OK)
@@ -46,8 +49,11 @@ class FormRouter:
     async def submit_form(self, form_id: uuid.UUID, submitFormModel: SubmitFormModel, current_user: Optional[TokenPayload] = Depends(AuthService.get_optional_current_user), session: Session = Depends(get_session)):
         return await FormService.submit_form(form_id, submitFormModel, current_user, session)
     
-    async def receive_form_result(self, form_id: uuid.UUID, current_user: Optional[TokenPayload] = Depends(AuthService.get_optional_current_user), session: Session = Depends(get_session)):
+    async def receive_form_result(self, form_id: uuid.UUID, current_user: Optional[TokenPayload] = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
         return await FormService.receive_form_result(form_id, current_user, session)
+    
+    async def upload_pdf_form(self, file: UploadFile, current_user: Optional[TokenPayload] = Depends(AuthService.get_current_user_token), session: Session = Depends(get_session)):
+        return await FormService.upload_pdf_form(file ,current_user, session)
     
 
 form_router = FormRouter().router

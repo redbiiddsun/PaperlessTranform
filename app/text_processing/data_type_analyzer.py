@@ -7,7 +7,7 @@ import difflib
 from typing import List
 from jsonschema import validate
 
-from DataTypeAnalyzer.llama_wraper import LlamaWrapper
+from app.text_processing.llama_wraper import LlamaWrapper
 
 
 class DataTypeAnalyzer(LlamaWrapper):
@@ -49,7 +49,7 @@ class DataTypeAnalyzer(LlamaWrapper):
         ```
 
     3. `"tel"`
-    - Description: A phone number, can include international format.
+    - Description: Only a phone number, can include international format.
     - Schema Format:
         ```json
         {

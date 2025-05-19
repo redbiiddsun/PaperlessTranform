@@ -22,7 +22,7 @@ def signJwt(sub: str):
     'iss': 'paperlesstranfrom',
     'sub': str(sub),
     'iat': int(time.time()),
-    'exp': int(time.time()) + 3600,
+    'exp': int(time.time()) + 3600 * 24,
     }
 
     if(settings.SECRET_KEY is None):

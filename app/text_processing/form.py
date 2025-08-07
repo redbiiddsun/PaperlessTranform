@@ -161,7 +161,7 @@ class Form:
             #  :
             #  ______________________________________________ 
             #
-            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (re.search(r'\s*:\s*', text)):
+            if re.match(r"^"+ re.escape(form_type) + r"{3,}", ctx.current()) and (re.search(r'\s*:\s*', ctx.previous())):
                 label.append(ctx.previous(2))
 
             # Check if the current start line has 3 or more dots and the previous line is end with a character
